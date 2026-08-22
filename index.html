@@ -338,6 +338,14 @@
     <script>
       const USUARIO = 'wxlter97';
       const TOPIC_REQUERIDO = 'showcase';
+      // Esta cuenta tiene un dominio personalizado a nivel de cuenta
+      // (configurado en GitHub → Settings → Pages) que reemplaza a
+      // wxlter97.github.io para TODOS los sitios de Pages. El endpoint
+      // /repos/{owner}/{repo}/pages que confirmaría esto por repo requiere
+      // autenticación, así que no se puede detectar en runtime sin token;
+      // se deja como constante. Si algún repo define su propio "homepage"
+      // en GitHub, ese valor tiene prioridad (ver más abajo).
+      const DOMINIO_PAGES = 'home.wxlter.dev';
       const CACHE_KEY = 'gh-pages-dashboard:cache';
       const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
@@ -394,7 +402,7 @@
 
         const tarjetas = repos
           .map((repo) => {
-            const url = repo.homepage && repo.homepage.trim() ? repo.homepage : `https://${USUARIO}.github.io/${repo.name}/`;
+            const url = repo.homepage && repo.homepage.trim() ? repo.homepage : `https://${DOMINIO_PAGES}/${repo.name}/`;
             const color = COLORES_LENGUAJE[repo.language] || 'var(--color-texto-terciario)';
             const desc = repo.description ? escaparHTML(repo.description) : 'Sin descripción.';
             return `
