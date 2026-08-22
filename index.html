@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Proyectos</title>
+    <meta
+      name="description"
+      content="Panel con los sitios de GitHub Pages publicados, generado automáticamente desde la API de GitHub."
+    />
+    <style>
+      /* Tokens al estilo Apple HIG: colores semánticos (con variante oscura vía
+         prefers-color-scheme), tipografía del sistema (SF Pro / -apple-system) y
+         radios/paddings sobre una grilla de 4-8pt. */
+      :root {
+        --color-bg: #f2f2f7; /* systemGroupedBackground */
+        --color-superficie: #ffffff; /* systemBackground */
+        --color-superficie-input: #eeeef1; /* campo "well" */
+        --color-texto: #1c1c1e; /* label */
+        --color-texto-suave: #6e6e73; /* secondaryLabel */
+        --color-texto-terciario: #8e8e93; /* tertiaryLabel */
+        --color-borde: rgba(60, 60, 67, 0.29); /* separator */
+        --color-primario: #007aff; /* systemBlue */
+        --color-primario-tinte: rgba(0, 122, 255, 0.12);
+        --color-primario-oscuro: #0059c8;
+        --color-error: #ff3b30; /* systemRed */
+        --color-ok: #34c759; /* systemGreen */
+        --color-alerta: #ff9500; /* systemOrange */
+        --radio-card: 18px;
+        --radio-control: 12px;
+        --radio-pill: 980px;
+        --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+        --sombra-flotante: 0 2px 10px rgba(0, 0, 0, 0.14);
+        color-scheme: light;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-bg: #000000;
+          --color-superficie: #1c1c1e;
+          --color-superficie-input: #2c2c2e;
+          --color-texto: #f5f5f7;
+          --color-texto-suave: #98989d;
+          --color-texto-terciario: #8e8e93;
+          --color-borde: rgba(84, 84, 88, 0.6);
+          --color-primario: #0a84ff;
+          --color-primario-tinte: rgba(10, 132, 255, 0.18);
+          --color-primario-oscuro: #6cb1ff;
+          --color-error: #ff453a;
+          --color-ok: #30d158;
+          --color-alerta: #ff9f0a;
+          --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.45);
+          color-scheme: dark;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      svg {
+        vertical-align: -0.125em;
+        flex-shrink: 0;
+      }
+
+      body {
+        margin: 0;
+        background: var(--color-bg);
+        color: var(--color-texto);
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Helvetica Neue',
+          Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .app-shell {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 24px 24px 64px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 2px 2px 0;
+        flex-wrap: wrap;
+      }
+
+      .app-header__titulo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .app-header__titulo svg {
+        color: var(--color-primario);
+        flex-shrink: 0;
+      }
+
+      .app-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+
+      .app-header__meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--color-texto-terciario);
+        font-size: 13px;
+      }
+
+      .boton-icono {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        background: var(--color-superficie-input);
+        color: var(--color-primario);
+        cursor: pointer;
+        transition:
+          background-color 0.15s ease,
+          transform 0.12s ease;
+      }
+
+      .boton-icono:hover {
+        background: var(--color-primario-tinte);
+      }
+
+      .boton-icono:active {
+        transform: scale(0.9);
+      }
+
+      .boton-icono--girando svg {
+        animation: girar 0.8s linear infinite;
+      }
+
+      @keyframes girar {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ---------- Estados (cargando / vacío / error) ---------- */
+      .estado {
+        background: var(--color-superficie);
+        border-radius: var(--radio-card);
+        box-shadow: var(--sombra-card);
+        padding: 48px 28px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        color: var(--color-texto-suave);
+      }
+
+      .estado svg {
+        color: var(--color-texto-terciario);
+        margin-bottom: 6px;
+      }
+
+      .estado h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--color-texto);
+      }
+
+      .estado p {
+        margin: 0;
+        max-width: 46ch;
+        font-size: 14.5px;
+      }
+
+      .estado code {
+        background: var(--color-superficie-input);
+        color: var(--color-texto);
+        padding: 2px 7px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+
+      .estado--error svg {
+        color: var(--color-error);
+      }
+
+      /* ---------- Grid de tarjetas ---------- */
+      .proyectos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+      }
+
+      .proyecto-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px;
+        border-radius: var(--radio-card);
+        background: var(--color-superficie);
+        box-shadow: var(--sombra-card);
+        color: inherit;
+        text-decoration: none;
+        transition:
+          box-shadow 0.2s ease,
+          transform 0.12s ease;
+      }
+
+      .proyecto-card:hover {
+        box-shadow:
+          0 0 0 1.5px var(--color-primario),
+          var(--sombra-card);
+      }
+
+      .proyecto-card:active {
+        transform: scale(0.98);
+      }
+
+      .proyecto-card__cabecera {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .proyecto-card__nombre {
+        font-weight: 600;
+        font-size: 16px;
+        letter-spacing: -0.005em;
+      }
+
+      .proyecto-card__externo {
+        color: var(--color-texto-terciario);
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .proyecto-card__desc {
+        font-size: 13.5px;
+        color: var(--color-texto-suave);
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .proyecto-card__pie {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 12.5px;
+        color: var(--color-texto-terciario);
+      }
+
+      .proyecto-card__lenguaje {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .proyecto-card__punto {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: var(--color-texto-terciario);
+      }
+
+      .app-footer {
+        text-align: center;
+        font-size: 12.5px;
+        color: var(--color-texto-terciario);
+        padding-top: 8px;
+      }
+
+      .app-footer a {
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="app-header__titulo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="8" height="8" rx="2"></rect>
+            <rect x="13" y="3" width="8" height="8" rx="2"></rect>
+            <rect x="3" y="13" width="8" height="8" rx="2"></rect>
+            <rect x="13" y="13" width="8" height="8" rx="2"></rect>
+          </svg>
+          <h1>Mis Proyectos</h1>
+        </div>
+        <div class="app-header__meta">
+          <span id="meta-texto">Cargando…</span>
+          <button id="boton-refrescar" class="boton-icono" title="Actualizar" aria-label="Actualizar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main id="contenido">
+        <div class="estado">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+          <p>Buscando proyectos publicados…</p>
+        </div>
+      </main>
+
+      <footer class="app-footer">
+        Datos obtenidos en vivo de la API pública de GitHub · repos con el topic
+        <code>showcase</code> y GitHub Pages activado
+      </footer>
+    </div>
+
+    <script>
+      const USUARIO = 'wxlter97';
+      const TOPIC_REQUERIDO = 'showcase';
+      const CACHE_KEY = 'gh-pages-dashboard:cache';
+      const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
+
+      const elContenido = document.getElementById('contenido');
+      const elMeta = document.getElementById('meta-texto');
+      const elBotonRefrescar = document.getElementById('boton-refrescar');
+
+      const ICONO_EXTERNO = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`;
+
+      const COLORES_LENGUAJE = {
+        JavaScript: '#f1e05a',
+        TypeScript: '#3178c6',
+        Python: '#3572A5',
+        HTML: '#e34c26',
+        CSS: '#563d7c',
+        Swift: '#F05138',
+        Java: '#b07219',
+        Go: '#00ADD8',
+        Rust: '#dea584',
+        Shell: '#89e051',
+      };
+
+      function formatearFechaRelativa(fechaISO) {
+        const diffMs = Date.now() - new Date(fechaISO).getTime();
+        const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (dias <= 0) return 'hoy';
+        if (dias === 1) return 'ayer';
+        if (dias < 30) return `hace ${dias} días`;
+        const meses = Math.floor(dias / 30);
+        if (meses < 12) return `hace ${meses} ${meses === 1 ? 'mes' : 'meses'}`;
+        const anios = Math.floor(meses / 12);
+        return `hace ${anios} ${anios === 1 ? 'año' : 'años'}`;
+      }
+
+      function renderEstado({ icono, titulo, descripcionHTML, error = false }) {
+        elContenido.innerHTML = `
+          <div class="estado ${error ? 'estado--error' : ''}">
+            ${icono}
+            <h2>${titulo}</h2>
+            <p>${descripcionHTML}</p>
+          </div>
+        `;
+      }
+
+      function renderProyectos(repos) {
+        if (repos.length === 0) {
+          renderEstado({
+            icono: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M8 12h8M12 8v8"></path></svg>`,
+            titulo: 'Todavía no hay proyectos publicados aquí',
+            descripcionHTML: `Agrega el topic <code>${TOPIC_REQUERIDO}</code> a cualquier repositorio con GitHub Pages activado (Settings → General → Topics, o desde la app de GitHub) y aparecerá aquí automáticamente.`,
+          });
+          return;
+        }
+
+        const tarjetas = repos
+          .map((repo) => {
+            const url = repo.homepage && repo.homepage.trim() ? repo.homepage : `https://${USUARIO}.github.io/${repo.name}/`;
+            const color = COLORES_LENGUAJE[repo.language] || 'var(--color-texto-terciario)';
+            const desc = repo.description ? escaparHTML(repo.description) : 'Sin descripción.';
+            return `
+              <a class="proyecto-card" href="${url}" target="_blank" rel="noopener noreferrer">
+                <div class="proyecto-card__cabecera">
+                  <span class="proyecto-card__nombre">${escaparHTML(repo.name)}</span>
+                  <span class="proyecto-card__externo">${ICONO_EXTERNO}</span>
+                </div>
+                <p class="proyecto-card__desc">${desc}</p>
+                <div class="proyecto-card__pie">
+                  ${
+                    repo.language
+                      ? `<span class="proyecto-card__lenguaje"><span class="proyecto-card__punto" style="background:${color}"></span>${escaparHTML(repo.language)}</span>`
+                      : '<span></span>'
+                  }
+                  <span>${formatearFechaRelativa(repo.pushed_at)}</span>
+                </div>
+              </a>
+            `;
+          })
+          .join('');
+
+        elContenido.innerHTML = `<div class="proyectos-grid">${tarjetas}</div>`;
+      }
+
+      function escaparHTML(texto) {
+        const div = document.createElement('div');
+        div.textContent = texto;
+        return div.innerHTML;
+      }
+
+      async function obtenerTodosLosRepos() {
+        const repos = [];
+        let pagina = 1;
+        while (true) {
+          const resp = await fetch(
+            `https://api.github.com/users/${USUARIO}/repos?per_page=100&page=${pagina}&sort=pushed`,
+            { headers: { Accept: 'application/vnd.github+json' } }
+          );
+          if (!resp.ok) {
+            const err = new Error(`GitHub API respondió ${resp.status}`);
+            err.status = resp.status;
+            throw err;
+          }
+          const lote = await resp.json();
+          repos.push(...lote);
+          if (lote.length < 100) break;
+          pagina += 1;
+        }
+        return repos;
+      }
+
+      function leerCache() {
+        try {
+          const crudo = localStorage.getItem(CACHE_KEY);
+          if (!crudo) return null;
+          const { timestamp, repos } = JSON.parse(crudo);
+          if (Date.now() - timestamp > CACHE_TTL_MS) return null;
+          return { timestamp, repos };
+        } catch {
+          return null;
+        }
+      }
+
+      function guardarCache(repos) {
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), repos }));
+        } catch {
+          /* localStorage no disponible: se ignora silenciosamente */
+        }
+      }
+
+      async function cargar({ forzar = false } = {}) {
+        elBotonRefrescar.classList.add('boton-icono--girando');
+        elBotonRefrescar.disabled = true;
+
+        const cache = !forzar ? leerCache() : null;
+        if (cache) {
+          const filtrados = cache.repos.filter((r) => r.has_pages && (r.topics || []).includes(TOPIC_REQUERIDO));
+          renderProyectos(filtrados);
+          elMeta.textContent = `Actualizado ${formatearFechaRelativa(new Date(cache.timestamp).toISOString())}`;
+          elBotonRefrescar.classList.remove('boton-icono--girando');
+          elBotonRefrescar.disabled = false;
+          return;
+        }
+
+        try {
+          const repos = await obtenerTodosLosRepos();
+          guardarCache(repos);
+          const filtrados = repos.filter((r) => r.has_pages && (r.topics || []).includes(TOPIC_REQUERIDO));
+          renderProyectos(filtrados);
+          elMeta.textContent = 'Actualizado ahora';
+        } catch (e) {
+          const esLimite = e.status === 403;
+          renderEstado({
+            icono: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+            titulo: esLimite ? 'Límite de la API de GitHub alcanzado' : 'No se pudo cargar la lista',
+            descripcionHTML: esLimite
+              ? 'GitHub limita las consultas sin autenticar a 60 por hora. Intenta de nuevo en unos minutos.'
+              : 'Ocurrió un error al consultar la API de GitHub. Intenta de nuevo.',
+            error: true,
+          });
+          elMeta.textContent = 'Error al actualizar';
+        } finally {
+          elBotonRefrescar.classList.remove('boton-icono--girando');
+          elBotonRefrescar.disabled = false;
+        }
+      }
+
+      elBotonRefrescar.addEventListener('click', () => cargar({ forzar: true }));
+      cargar();
+    </script>
+  </body>
+</html>
