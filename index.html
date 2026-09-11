@@ -8,50 +8,40 @@
       name="description"
       content="Panel con los sitios de GitHub Pages publicados, generado automáticamente desde la API de GitHub."
     />
-    <style>
-      /* Tokens al estilo Apple HIG: colores semánticos (con variante oscura vía
-         prefers-color-scheme), tipografía del sistema (SF Pro / -apple-system) y
-         radios/paddings sobre una grilla de 4-8pt. */
-      :root {
-        --color-bg: #f2f2f7; /* systemGroupedBackground */
-        --color-superficie: #ffffff; /* systemBackground */
-        --color-superficie-input: #eeeef1; /* campo "well" */
-        --color-texto: #1c1c1e; /* label */
-        --color-texto-suave: #6e6e73; /* secondaryLabel */
-        --color-texto-terciario: #8e8e93; /* tertiaryLabel */
-        --color-borde: rgba(60, 60, 67, 0.29); /* separator */
-        --color-primario: #007aff; /* systemBlue */
-        --color-primario-tinte: rgba(0, 122, 255, 0.12);
-        --color-primario-oscuro: #0059c8;
-        --color-error: #ff3b30; /* systemRed */
-        --color-ok: #34c759; /* systemGreen */
-        --color-alerta: #ff9500; /* systemOrange */
-        --radio-card: 18px;
-        --radio-control: 12px;
-        --radio-pill: 980px;
-        --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
-        --sombra-flotante: 0 2px 10px rgba(0, 0, 0, 0.14);
-        color-scheme: light;
-      }
 
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --color-bg: #000000;
-          --color-superficie: #1c1c1e;
-          --color-superficie-input: #2c2c2e;
-          --color-texto: #f5f5f7;
-          --color-texto-suave: #98989d;
-          --color-texto-terciario: #8e8e93;
-          --color-borde: rgba(84, 84, 88, 0.6);
-          --color-primario: #0a84ff;
-          --color-primario-tinte: rgba(10, 132, 255, 0.18);
-          --color-primario-oscuro: #6cb1ff;
-          --color-error: #ff453a;
-          --color-ok: #30d158;
-          --color-alerta: #ff9f0a;
-          --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.45);
-          color-scheme: dark;
-        }
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Sistema de marca "wxlter.": papel/tinta/amarillo, Archivo Black +
+         Archivo + JetBrains Mono, bordes duros de 2px, radio 0, sin sombras
+         ni blur, hover por inversión instantánea de color. Una sola paleta
+         clara — el sistema de marca no define modo oscuro. */
+      :root {
+        --brand-faro: #ffdb00;
+        --ink: #111111;
+        --paper: #f4f3ef;
+        --smoke: #6b6b63;
+        --ash: #c9c9c2;
+        --ink-soft: #3d3d38;
+        --ink-raised: #1c1c1a;
+        --on-ink: #edede7;
+        --on-ink-dim: #8a8a80;
+        --danger: #d92b0c;
+        --success: #0b7a45;
+
+        --font-display: 'Archivo Black', 'Archivo', -apple-system, sans-serif;
+        --font-body: 'Archivo', -apple-system, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+        --rule: 2px solid var(--ink);
+        --rule-heavy: 3px solid var(--ink);
+        --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        color-scheme: light;
       }
 
       * {
@@ -63,14 +53,22 @@
         flex-shrink: 0;
       }
 
+      ::selection {
+        background: var(--brand-faro);
+        color: var(--ink);
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--brand-faro);
+        outline-offset: 0;
+        border-radius: 0;
+      }
+
       body {
         margin: 0;
-        background: var(--color-bg);
-        color: var(--color-texto);
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Helvetica Neue',
-          Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
+        background: var(--paper);
+        color: var(--ink-soft);
+        font-family: var(--font-body);
         font-size: 16px;
         line-height: 1.45;
       }
@@ -78,11 +76,11 @@
       .app-shell {
         max-width: 1080px;
         margin: 0 auto;
-        padding: 24px 24px 64px;
+        padding: 32px 24px 64px;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        gap: 22px;
+        gap: 24px;
       }
 
       .app-header {
@@ -90,34 +88,38 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        padding: 2px 2px 0;
+        padding-bottom: 20px;
+        border-bottom: var(--rule);
         flex-wrap: wrap;
       }
 
       .app-header__titulo {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
       }
 
       .app-header__titulo svg {
-        color: var(--color-primario);
         flex-shrink: 0;
       }
 
       .app-header h1 {
-        font-size: 22px;
-        font-weight: 700;
-        letter-spacing: -0.01em;
+        font-family: var(--font-display);
+        font-size: 24px;
+        letter-spacing: -0.02em;
+        color: var(--ink);
         margin: 0;
       }
 
       .app-header__meta {
         display: flex;
         align-items: center;
-        gap: 10px;
-        color: var(--color-texto-terciario);
-        font-size: 13px;
+        gap: 12px;
+        color: var(--smoke);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
       }
 
       .boton-icono {
@@ -126,22 +128,22 @@
         justify-content: center;
         width: 34px;
         height: 34px;
-        border-radius: 50%;
-        border: none;
-        background: var(--color-superficie-input);
-        color: var(--color-primario);
+        border-radius: 0;
+        border: var(--rule);
+        background: var(--paper);
+        color: var(--ink);
         cursor: pointer;
-        transition:
-          background-color 0.15s ease,
-          transform 0.12s ease;
+        transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out);
       }
 
       .boton-icono:hover {
-        background: var(--color-primario-tinte);
+        background: var(--ink);
+        color: var(--brand-faro);
       }
 
       .boton-icono:active {
-        transform: scale(0.9);
+        background: var(--brand-faro);
+        color: var(--ink);
       }
 
       .boton-icono--girando svg {
@@ -156,28 +158,28 @@
 
       /* ---------- Estados (cargando / vacío / error) ---------- */
       .estado {
-        background: var(--color-superficie);
-        border-radius: var(--radio-card);
-        box-shadow: var(--sombra-card);
+        background: var(--paper);
+        border: var(--rule);
         padding: 48px 28px;
         text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 10px;
-        color: var(--color-texto-suave);
+        color: var(--smoke);
       }
 
       .estado svg {
-        color: var(--color-texto-terciario);
+        color: var(--ink);
         margin-bottom: 6px;
       }
 
       .estado h2 {
         margin: 0;
+        font-family: var(--font-display);
         font-size: 17px;
-        font-weight: 600;
-        color: var(--color-texto);
+        letter-spacing: -0.01em;
+        color: var(--ink);
       }
 
       .estado p {
@@ -187,15 +189,20 @@
       }
 
       .estado code {
-        background: var(--color-superficie-input);
-        color: var(--color-texto);
+        background: var(--ink);
+        color: var(--brand-faro);
         padding: 2px 7px;
-        border-radius: 6px;
-        font-size: 13px;
+        font-family: var(--font-mono);
+        font-size: 12.5px;
       }
 
-      .estado--error svg {
-        color: var(--color-error);
+      .estado--error {
+        border-color: var(--danger);
+      }
+
+      .estado--error svg,
+      .estado--error h2 {
+        color: var(--danger);
       }
 
       /* ---------- Grid de tarjetas ---------- */
@@ -211,24 +218,35 @@
         flex-direction: column;
         gap: 12px;
         padding: 18px;
-        border-radius: var(--radio-card);
-        background: var(--color-superficie);
-        box-shadow: var(--sombra-card);
+        border-radius: 0;
+        border: var(--rule);
+        background: var(--paper);
         color: inherit;
         text-decoration: none;
-        transition:
-          box-shadow 0.2s ease,
-          transform 0.12s ease;
+        transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out);
       }
 
-      .proyecto-card:hover {
-        box-shadow:
-          0 0 0 1.5px var(--color-primario),
-          var(--sombra-card);
+      .proyecto-card:hover,
+      .proyecto-card:focus-visible {
+        background: var(--ink);
+        color: var(--on-ink);
+      }
+
+      .proyecto-card:hover .proyecto-card__desc,
+      .proyecto-card:focus-visible .proyecto-card__desc {
+        color: var(--on-ink-dim);
+      }
+
+      .proyecto-card:hover .proyecto-card__pie,
+      .proyecto-card:focus-visible .proyecto-card__pie,
+      .proyecto-card:hover .proyecto-card__externo,
+      .proyecto-card:focus-visible .proyecto-card__externo {
+        color: var(--brand-faro);
       }
 
       .proyecto-card:active {
-        transform: scale(0.98);
+        background: var(--brand-faro);
+        color: var(--ink);
       }
 
       .proyecto-card__cabecera {
@@ -239,25 +257,27 @@
       }
 
       .proyecto-card__nombre {
-        font-weight: 600;
+        font-weight: 700;
         font-size: 16px;
         letter-spacing: -0.005em;
       }
 
       .proyecto-card__externo {
-        color: var(--color-texto-terciario);
+        color: var(--smoke);
         flex-shrink: 0;
         margin-top: 2px;
+        transition: color 120ms var(--ease-out);
       }
 
       .proyecto-card__desc {
         font-size: 13.5px;
-        color: var(--color-texto-suave);
+        color: var(--smoke);
         flex: 1;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        transition: color 120ms var(--ease-out);
       }
 
       .proyecto-card__pie {
@@ -265,8 +285,12 @@
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        font-size: 12.5px;
-        color: var(--color-texto-terciario);
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--smoke);
+        transition: color 120ms var(--ease-out);
       }
 
       .proyecto-card__lenguaje {
@@ -276,22 +300,26 @@
       }
 
       .proyecto-card__punto {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
+        width: 8px;
+        height: 8px;
+        border-radius: 0;
         flex-shrink: 0;
-        background: var(--color-texto-terciario);
+        background: var(--smoke);
       }
 
       .app-footer {
         text-align: center;
-        font-size: 12.5px;
-        color: var(--color-texto-terciario);
-        padding-top: 8px;
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--smoke);
+        padding-top: 12px;
+        border-top: var(--rule);
       }
 
       .app-footer a {
-        color: inherit;
+        color: var(--ink);
       }
     </style>
   </head>
@@ -299,11 +327,15 @@
     <div class="app-shell">
       <header class="app-header">
         <div class="app-header__titulo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="8" height="8" rx="2"></rect>
-            <rect x="13" y="3" width="8" height="8" rx="2"></rect>
-            <rect x="3" y="13" width="8" height="8" rx="2"></rect>
-            <rect x="13" y="13" width="8" height="8" rx="2"></rect>
+          <svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true">
+            <rect width="100" height="100" fill="#111111" />
+            <polyline
+              points="14,24 32,76 50,44 68,76 86,24"
+              fill="none"
+              stroke="#FFDB00"
+              stroke-width="15"
+              stroke-linejoin="miter"
+            />
           </svg>
           <h1>Mis Proyectos</h1>
         </div>
@@ -338,14 +370,13 @@
     <script>
       const USUARIO = 'wxlter97';
       const TOPIC_REQUERIDO = 'showcase';
-      // Esta cuenta tiene un dominio personalizado a nivel de cuenta
-      // (configurado en GitHub → Settings → Pages) que reemplaza a
-      // wxlter97.github.io para TODOS los sitios de Pages. El endpoint
-      // /repos/{owner}/{repo}/pages que confirmaría esto por repo requiere
-      // autenticación, así que no se puede detectar en runtime sin token;
-      // se deja como constante. Si algún repo define su propio "homepage"
+      // Los dominios personalizados de GitHub Pages se configuran por
+      // repositorio (Settings → Pages → Custom domain), no existe un
+      // "dominio de cuenta" que reemplace *.github.io para todos los sitios.
+      // Verificado vía GET /repos/{owner}/{repo}/pages para cada repo con el
+      // topic showcase: ninguno define cname, así que su URL real es la que
+      // asigna GitHub por defecto. Si un repo sí define su propio "homepage"
       // en GitHub, ese valor tiene prioridad (ver más abajo).
-      const DOMINIO_PAGES = 'home.wxlter.dev';
       const CACHE_KEY = 'gh-pages-dashboard:cache';
       const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
@@ -402,8 +433,8 @@
 
         const tarjetas = repos
           .map((repo) => {
-            const url = repo.homepage && repo.homepage.trim() ? repo.homepage : `https://${DOMINIO_PAGES}/${repo.name}/`;
-            const color = COLORES_LENGUAJE[repo.language] || 'var(--color-texto-terciario)';
+            const url = repo.homepage && repo.homepage.trim() ? repo.homepage : `https://${USUARIO}.github.io/${repo.name}/`;
+            const color = COLORES_LENGUAJE[repo.language] || 'var(--smoke)';
             const desc = repo.description ? escaparHTML(repo.description) : 'Sin descripción.';
             return `
               <a class="proyecto-card" href="${url}" target="_blank" rel="noopener noreferrer">
