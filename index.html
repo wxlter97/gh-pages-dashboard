@@ -97,6 +97,8 @@
         display: flex;
         align-items: center;
         gap: 12px;
+        color: inherit;
+        text-decoration: none;
       }
 
       .app-header__titulo svg {
@@ -326,7 +328,7 @@
   <body>
     <div class="app-shell">
       <header class="app-header">
-        <div class="app-header__titulo">
+        <a class="app-header__titulo" href="https://home.wxlter.dev/" title="Volver al inicio del portafolio">
           <svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true">
             <rect width="100" height="100" fill="#111111" />
             <polyline
@@ -338,7 +340,7 @@
             />
           </svg>
           <h1>Mis Proyectos</h1>
-        </div>
+        </a>
         <div class="app-header__meta">
           <span id="meta-texto">Cargando…</span>
           <button id="boton-refrescar" class="boton-icono" title="Actualizar" aria-label="Actualizar">
